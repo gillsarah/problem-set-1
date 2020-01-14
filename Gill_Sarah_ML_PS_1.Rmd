@@ -1,0 +1,234 @@
+---
+title: "Gill_Sarah_ML_PS_1"
+author: "Sarah Gill"
+date: "1/13/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("~/Desktop/Machine Learning/PS_1")
+library(readr)
+library(tidyverse)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+names(mtcars)
+summary(mtcars)
+```
+1.
+a. Predict miles per gallon (mpg) as a function of cylinders (cyl). What is the output and parameter values for your model?
+```{r 1a}
+# Here we regress wage on IQ and then on age, bivariate 
+#lm(wage ~ IQ, data = wage)
+
+model1 <- lm(mpg ~ cyl, data = mtcars)
+summary(model1)
+#predict(model1)
+
+```
+There is a statistically significant relationship between number of cylandars and mpg.
+Each additional cylinder is associated with a decrease in miles per gallon of 2.876mpg. 
+These results show a theroretical mpg of 37.88mpg for the impossibe car that has no cylandars. 
+
+
+??????
+b. Write the statistical form of the simple model in the previous question (i.e., what is the population regression function?).
+
+mpg = intercept + b*cyl + error
+
+
+c.Add vehicle weight (wt) to the specification. Report the results and talk about differences in coefficient size, effects, etc.
+```{r 1c}
+model2 <- lm(mpg ~ cyl + wt, data = mtcars)
+summary(model2)
+#predict(model2)
+
+```
+
+There is a statistically significant relationship between number of cylandars and mpg and between weight and mpg. Each additional cylinder is associated with 1.508 fewer miles per gallon, holding weight constant. Each additional 1000lbs (one unit in wt) is associated with 3.191 fewer miles per gallon, holding number of cylinders constant. 
+
+These results show a theroretical mpg of 39.69mpg for the impossibe car that weighs nothing and has no cylandars. 
+
+Note that the magnitude of the estimate for cyl is less than in the univariate regression. Some of the decrease in mpg that was associated with cly in the previous model may be better explained by weight.
+
+
+
+d. Interact weight and cylinders and report the results. What is the same or different? What are we theoretically asserting by including a multiplicative interaction term in the function?
+
+```{r 1d}
+model3 <- lm(mpg ~ cyl*wt, data = mtcars) 
+summary(model3)
+#predict(model3)
+```
+When we include an interaction term for wt and cyl, the coefficient estimates for both wt and cyl increase in magnitude (they are both more negative). However these coefficients can no longer be interpreted on their own. By including an interaction term we are makeing the assertion that the relationship between weight and number of cylanders moderates or mediates the relationship between weight and mpg and between number of cylandars and mpg. In other words, we assert that the relationship between cylanders and mpg is effected by weight and the relationship between weight and mpg is effected by number of cylanders.
+This assertion is supported by the results, with the estimate for the interaction term being statistically significant, and it's inclusion improvign our Adjusted R-squared.
+The estiamted relationship is:
+
+
+cyl on mpg:  -3.81 + 0.81*wt
+wt on mpg:  -8.66 + 0.81*cyl
+
+So for a car that is the mean weight in this dataset, an incerease of one additional cylandar is associated with a decrease of roughtly 1.20mpg.
+
+mean wt in dataset: 3.217 
+
+```{r}
+ -3.8032 + 0.8084 *(3.217)
+```
+Or for a car that has the mean number of cylanders for this dataset, an increase of an additional 1000lbs (one unit of wt) is associated with a decrease of rouglly 3.65mpg
+
+mean cyl in dataset: 6.188
+```{r}
+-8.6556  + 0.8084 *(6.188)
+```
+
+
+
+
+
+2. Non-linear Regression
+a. Fit a polynomial regression, predicting wage as a function of a second order polynomial for age. Report the results and discuss the output
+```{r 2a}
+wage_data <- read_csv("wage_data.csv")
+
+wage_model <- lm(wage ~ age + I(age^2), data = wage_data)
+#wage_model <- lm(wage ~ poly(age, degree = 2, raw = T), data = wage_data)
+summary(wage_model)
+```
+c. Describe the output. What do you see substantively? What are we asserting by fitting a polynomial regression?
+
+By fitting a polynomial to this data, we are assurting that the relationship between age and wage may be different at different ages. Useing a quadratic function we are allowing for the relationship to be concave or convex and even to change signs.
+
+Here we see that at lower ages incerasing age is associated with increasing wage, however this is increasing at a decreasing rate (as indicated by the negative sign on the age^2 coefficient, thus our fitted curve is concave). Also the positive slope may change to negative at some age. 
+
+increasing age by one year is associated with a change in wage of 5.29 - 0.053(age)
+
+b. Plot the function with 95% confidence interval bounds.
+```{r, warning=FALSE}
+# plot
+#works but throws an error
+y = wage_data$wage
+x = wage_data$age
+plot(x,y,col=rgb(0.4,0.4,0.8,0.6),pch=16 , cex=1.3, xlab = "Wage", ylab = "Age") 
+
+#myPredict <- predict( wage_model ) 
+#ix <- sort(x,index.return=T)$ix
+#lines(x[ix], myPredict[ix], col=2, lwd=2 ) 
+
+#Curve
+myPredict <- predict( wage_model , interval="predict", level=0.95 )
+ix <- sort(x,index.return=T)$ix
+lines(x[ix], myPredict[ix , 1], col=2, lwd=2 )
+
+CI <- predict(wage_model, x=wage, interval = 'confidence', level=0.95)
+#CI <- predict( wage_model , interval="confidence", level=0.95 )
+#ix <- sort(x,index.return=T)$ix
+#lines(x[ix], CI[ix , 1], col=2, lwd=2 )
+#CI
+polygon(c(rev(x[ix]), x[ix]), c(rev(CI[ ix,3]), CI[ ix,2]), col = rgb(0.7,0.7,0.7,0.4) , border = "black", alpha = 1)
+
+#cite: https://www.r-graph-gallery.com/44-polynomial-curve-fitting.html
+#cite: https://www.r-graph-gallery.com/45-confidence-interval-around-polynomial-curve-fitting.html
+#cite: https://www.researchgate.net/post/How_can_I_put_confidence_intervals_in_R_plot
+```
+From the plot we can see that wage increases with age untill about 50, when each additional year of age is then associated with a decreasein wage. 
+
+
+b.
+```{r plot}
+#does not work
+ggplot(data = wage_data) +
+  geom_point(aes(x = age, y = wage)) 
+
+m =lm(wage ~ age, data = wage_data)
+wx = par("usr")[1:2]
+new.x = seq(wx[1],wx[2],len=100)
+pred = predict(m, new=data.frame(x=new.x), interval="conf")
+
+polygon(c(new.x,rev(new.x)),c(pred[,"lwr"],rev(pred[,"upr"])),border=NA,col=blues9[3])
+lines(new.x,pred[,"fit"],lwd=2,col=blues9[8])
+points(x,y,pch=16)
+box()
+#lines(smooth.pline(wage, predict(wage_model)), col = "blue", lwd = 3)
+```
+
+
+
+```{r}
+y = wage_data$wage
+x = wage_data$age
+plot(x,y,col=rgb(0.4,0.4,0.8,0.6),pch=16 , cex=1.3) 
+m = wage_model
+wx = par("usr")[1:2]
+new.x = seq(wx[1],wx[2],len=100)
+pred = predict(m, new=data.frame(x=new.x), interval="conf")
+polygon(c(new.x,rev(new.x)),c(pred[,"lwr"],rev(pred[,"upr"])),border=NA,col=blues9[3])
+lines(new.x,pred[,"fit"],lwd=2,col=blues9[8])
+#points(x,y,pch=16)
+#box()
+#https://www.researchgate.net/post/How_can_I_put_confidence_intervals_in_R_plot
+```
+
+
+```{r}
+y = wage_data$wage
+x = wage_data$age
+plot(y~x,type="n")
+
+m = lm(y~x)
+wx = par("usr")[1:2]
+new.x = seq(wx[1],wx[2],len=100)
+pred = predict(m, new=data.frame(x=new.x), interval="conf")
+
+polygon(c(new.x,rev(new.x)),c(pred[,"lwr"],rev(pred[,"upr"])),border=NA,col=blues9[3])
+lines(new.x,pred[,"fit"],lwd=2,col=blues9[8])
+points(x,y,pch=16)
+box()
+#cite: https://www.researchgate.net/post/How_can_I_put_confidence_intervals_in_R_plot
+
+```
+
+
+```{r}
+#https://www.researchgate.net/post/How_can_I_put_confidence_intervals_in_R_plot
+# example data from the built-in data set "mtcars"
+x = mtcars$wt
+y = mtcars$drat
+# prepare plot, fit model, get predictions,
+# add lines for confidence limits and regression line, add points
+plot(y~x,type="n")
+m = lm(y~x)
+wx = par("usr")[1:2]
+new.x = seq(wx[1],wx[2],len=100)
+pred = predict(m, new=data.frame(x=new.x), interval="conf")
+lines(new.x,pred[,"fit"],lwd=2)
+lines(new.x,pred[,"lwr"],lty=3)
+lines(new.x,pred[,"upr"],lty=3)
+points(x,y,pch=16,col="steelblue")
+```
+
+```{r}
+#alternative 
+plot(y~x,type="n")
+polygon(c(new.x,rev(new.x)),c(pred[,"lwr"],rev(pred[,"upr"])),border=NA,col=blues9[3])
+lines(new.x,pred[,"fit"],lwd=2,col=blues9[8])
+points(x,y,pch=16)
+box()
+#cite: https://www.researchgate.net/post/How_can_I_put_confidence_intervals_in_R_plot
+
+```
+
+
+d. How does a polynomial regression differ both statistically and substantively from a linear regression
+```{r 2d}
+#F-test
+#use ANOVA
+#https://www.youtube.com/watch?v=ZYN0YD7UfK4
+```
