@@ -12,11 +12,6 @@ library(readr)
 library(tidyverse)
 ```
 
-## R Markdown
-
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
 
 ```{r cars}
 names(mtcars)
@@ -33,12 +28,12 @@ summary(model1)
 #predict(model1)
 
 ```
-There is a statistically significant relationship between number of cylindars and mpg.
+There is a statistically significant relationship between number of cylinders and mpg.
 Each additional cylinder is associated with a decrease in miles per gallon of 2.876mpg. 
-These results show a theoretical mpg of 37.88mpg for the impossible car that has no cylindars. 
+These results show a theoretical mpg of 37.88mpg for the impossible car that has no cylinders. 
 
 
-??????
+
 b. Write the statistical form of the simple model in the previous question (i.e., what is the population regression function?).
 
 mpg = intercept + b*cyl + error
@@ -52,9 +47,9 @@ summary(model2)
 
 ```
 
-There is a statistically significant relationship between number of cylindars and mpg and between weight and mpg. Each additional cylinder is associated with 1.508 fewer miles per gallon, holding weight constant. Each additional 1000lbs (one unit in wt) is associated with 3.191 fewer miles per gallon, holding number of cylinders constant. 
+There is a statistically significant relationship between number of cylinders and mpg and between weight and mpg. Each additional cylinder is associated with 1.508 fewer miles per gallon, holding weight constant. Each additional 1000lbs (one unit in wt) is associated with 3.191 fewer miles per gallon, holding number of cylinders constant. 
 
-These results show a theoretical mpg of 39.69mpg for the impossible car that weighs nothing and has no cylindars. 
+These results show a theoretical mpg of 39.69mpg for the impossible car that weighs nothing and has no cylinders. 
 
 Note that the magnitude of the estimate for cyl is less than in the univariate regression. Some of the decrease in mpg that was associated with cly in the previous model may be better explained by weight.
 
@@ -128,7 +123,6 @@ ix <- sort(x,index.return=T)$ix
 lines(x[ix], myPredict[ix , 1], col=2, lwd=2 )
 
 CI <- predict(wage_model, x=wage, interval = 'confidence', level=0.95)
-#CI <- predict( wage_model , interval="confidence", level=0.95 )
 #ix <- sort(x,index.return=T)$ix
 #lines(x[ix], CI[ix , 1], col=2, lwd=2 )
 #CI
@@ -161,7 +155,12 @@ lines(new.x,pred[,"fit"],lwd=2,col=blues9[8])
 
 d. How does a polynomial regression differ both statistically and substantively from a linear regression
 ```{r 2d}
-#F-test
-#use ANOVA
-#https://www.youtube.com/watch?v=ZYN0YD7UfK4
+lin_wage_model = lm(wage ~ age, data = wage_data)
+
+anova(lin_wage_model, wage_model)
+#cite: https://www.youtube.com/watch?v=ZYN0YD7UfK4
 ```
+The model that includes age squared is statistically significantly better at predicting age than the purely linear model. 
+
+
+
