@@ -4,6 +4,8 @@ author: "Sarah Gill"
 date: "1/13/2020"
 output: pdf_document
 ---
+# Problem Set 1: Learning and Regression
+## Introduction to Machine Learning
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -13,12 +15,20 @@ library(tidyverse)
 ```
 
 
+## Statistical and Machine Learning
+
+Supervised learning is a means of producing predictive models given data where the features and labels are known. The learner is able to improve (reduce the error), over iterations by responding to feedback. Learning is conceptualized as the machine’s response to this feedback (it’s error rate). Thus the data, with both X and Y, is used to iteratively refine the algorithm or mapping process of X to Y as the machine tries to minimize the error. This is much like regression analysis if we were looking only for the best model of the data regardless of theory. The target of supervised learning is to fit a model well to the dataset (given X and Y) such that it accurately predicts the Y for data outside of the dataset. Initially this means doing well in the test portion of the data (kept out from the initial training dataset), but in the end the idea is to be able predict Ys that are not known. For instance, supervised machine learning is often used in financial forecasting. 
+
+Unsupervised learning is a means of discovering patterns in data, either directly or through dimension-reduction. With unsupervised learning the dataset only has the features (X), and not the labels (Y). The learning is not supervised in that the machine is not given the feedback of how well it did in each iteration, as is the case in supervised learning, but instead engages in pattern discovery.  The number of classes does not need to be known. The goal is not to create a predictive model, but rather to learn about the data. For example, unsupervised learning has been used to generate possible protean folding combinations for researchers to investigate in a bio-chemistry research lab. 
+
+
+
 ```{r cars}
 names(mtcars)
 summary(mtcars)
 ```
-1.
-a. Predict miles per gallon (mpg) as a function of cylinders (cyl). What is the output and parameter values for your model?
+## 1. Linear Regression Regression
+### a. Predict miles per gallon (mpg) as a function of cylinders (cyl). What is the output and parameter values for your model?
 ```{r 1a}
 # Here we regress wage on IQ and then on age, bivariate 
 #lm(wage ~ IQ, data = wage)
@@ -34,12 +44,12 @@ These results show a theoretical mpg of 37.88mpg for the impossible car that has
 
 
 
-b. Write the statistical form of the simple model in the previous question (i.e., what is the population regression function?).
+### b. Write the statistical form of the simple model in the previous question (i.e., what is the population regression function?).
 
 mpg = intercept + b*cyl + error
 
 
-c.Add vehicle weight (wt) to the specification. Report the results and talk about differences in coefficient size, effects, etc.
+### c. Add vehicle weight (wt) to the specification. Report the results and talk about differences in coefficient size, effects, etc.
 ```{r 1c}
 model2 <- lm(mpg ~ cyl + wt, data = mtcars)
 summary(model2)
@@ -55,7 +65,7 @@ Note that the magnitude of the estimate for cyl is less than in the univariate r
 
 
 
-d. Interact weight and cylinders and report the results. What is the same or different? What are we theoretically asserting by including a multiplicative interaction term in the function?
+### d. Interact weight and cylinders and report the results. What is the same or different? What are we theoretically asserting by including a multiplicative interaction term in the function?
 
 ```{r 1d}
 model3 <- lm(mpg ~ cyl*wt, data = mtcars) 
@@ -88,8 +98,8 @@ mean cyl in dataset: 6.188
 
 
 
-2. Non-linear Regression
-a. Fit a polynomial regression, predicting wage as a function of a second order polynomial for age. Report the results and discuss the output
+## 2. Non-linear Regression
+### a. Fit a polynomial regression, predicting wage as a function of a second order polynomial for age. Report the results and discuss the output
 ```{r 2a}
 wage_data <- read_csv("wage_data.csv")
 
@@ -97,7 +107,7 @@ wage_model <- lm(wage ~ age + I(age^2), data = wage_data)
 #wage_model <- lm(wage ~ poly(age, degree = 2, raw = T), data = wage_data)
 summary(wage_model)
 ```
-c. Describe the output. What do you see substantively? What are we asserting by fitting a polynomial regression?
+### c. Describe the output. What do you see substantively? What are we asserting by fitting a polynomial regression?
 
 By fitting a polynomial to this data, we are asserting that the relationship between age and wage may be different at different ages. Using a quadratic function we are allowing for the relationship to be concave or convex and even to change signs.
 
@@ -105,7 +115,7 @@ Here we see that at lower ages increasing age is associated with increasing wage
 
 increasing age by one year is associated with a change in wage of 5.29 - 0.053(age)
 
-b. Plot the function with 95% confidence interval bounds.
+### b. Plot the function with 95% confidence interval bounds.
 ```{r, warning=FALSE}
 # plot
 #works but throws an error
@@ -135,32 +145,15 @@ polygon(c(rev(x[ix]), x[ix]), c(rev(CI[ ix,3]), CI[ ix,2]), col = rgb(0.7,0.7,0.
 From the plot we can see that wage increases with age until about 50, when each additional year of age is then associated with a decrease in wage. 
 
 
-```{r}
-y = wage_data$wage
-x = wage_data$age
-plot(x,y,col=rgb(0.4,0.4,0.8,0.6),pch=16 , cex=1.3) 
-m = wage_model
-wx = par("usr")[1:2]
-new.x = seq(wx[1],wx[2],len=100)
-pred = predict(m, new=data.frame(x=new.x), interval="conf")
-polygon(c(new.x,rev(new.x)),c(pred[,"lwr"],rev(pred[,"upr"])),border=NA,col=blues9[3])
-lines(new.x,pred[,"fit"],lwd=2,col=blues9[8])
-#points(x,y,pch=16)
-#box()
-#https://www.researchgate.net/post/How_can_I_put_confidence_intervals_in_R_plot
-```
 
-
-
-
-d. How does a polynomial regression differ both statistically and substantively from a linear regression
+### d. How does a polynomial regression differ both statistically and substantively from a linear regression
 ```{r 2d}
 lin_wage_model = lm(wage ~ age, data = wage_data)
 
 anova(lin_wage_model, wage_model)
 #cite: https://www.youtube.com/watch?v=ZYN0YD7UfK4
 ```
+The polynomial regression allows for a non-linear relationship between age and wage and thus is a more flexibal though harder to interpret modle.
 The model that includes age squared is statistically significantly better at predicting age than the purely linear model. 
-
 
 
